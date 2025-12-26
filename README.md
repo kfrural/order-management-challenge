@@ -1,69 +1,191 @@
-# Desafio Técnico Backend
+# Order Management Challenge – Backend
 
-**Objetivo:** Avaliar organização de código, domínio de TypeScript e implementação de regras de negócio.
-**Stack:** Node.js, Express, Mongoose, TypeScript.
-**Testes:** Vitest (Diferencial).
-
-### Estrutura de Dados
-
-**1. User**
-
-* `email` (unique), `password`.
-
-**2. Order**
-
-* Campos: `lab`, `patient`, `customer` (strings).
-* `state`: `CREATED` -> `ANALYSIS` -> `COMPLETED`.
-* `status`: `ACTIVE` | `DELETED`.
-* `services` (Array obrigatório): `{ name: string, value: number, status: 'PENDING' | 'DONE' }`.
+Este projeto foi desenvolvido como parte de um **desafio técnico backend**, com o objetivo de demonstrar **organização de código, domínio de TypeScript, modelagem com Mongoose e implementação de regras de negócio**.
 
 ---
 
-### ETAPA 1: Essencial (Obrigatório)
+## 📌 Tecnologias Utilizadas
 
-1. **Autenticação:**
-* Registro e Login retornando JWT.
-* Middleware de proteção para rotas de pedidos.
-
-
-2. **Gestão de Pedidos:**
-* **POST /orders:** Criação do pedido. Padrão: `state: CREATED`, `status: ACTIVE`.
-* **GET /orders:** Listagem com paginação e filtro por `state`.
-
-
+- **Node.js**
+- **Express**
+- **TypeScript**
+- **MongoDB**
+- **Mongoose**
+- **JWT (JSON Web Token)**
+- **Vitest** (testes unitários)
 
 ---
 
-### ETAPA 2: Diferencial (Regras e Qualidade)
+## 📁 Estrutura do Projeto
 
-1. **Validação de Negócio:**
-* Não permitir criação de pedidos sem serviços ou com valor total zerado.
+A arquitetura foi organizada visando **separação de responsabilidades**, **facilidade de manutenção** e **testabilidade**:
 
+```
 
-2. **Fluxo de Status:**
-* Endpoint `PATCH /orders/:id/advance`.
-* A transição deve respeitar a ordem estrita: `CREATED` -> `ANALYSIS` -> `COMPLETED`.
-* Bloquear tentativas de pular etapas ou retroceder.
+src/
+├─ config/
+│   ├─ database.ts
+│   └─ env.ts
+├─ middlewares/
+│   └─ auth.middleware.ts
+├─ modules/
+│   ├─ auth/
+│   │   ├─ auth.controller.ts
+│   │   ├─ auth.routes.ts
+│   │   └─ auth.service.ts
+│   ├─ orders/
+│   │   ├─ order.controller.ts
+│   │   ├─ order.model.ts
+│   │   ├─ order.routes.ts
+│   │   └─ order.service.ts
+│   └─ users/
+│       └─ user.model.ts
+├─ tests/
+│   └─ order-state.spec.ts
+├─ app.ts
+└─ server.ts
 
-
-3. **Testes (Vitest):**
-* Teste unitário garantindo que a lógica de transição de `state` funciona e bloqueia ações inválidas.
-
-
+```
 
 ---
 
-### Critérios de Avaliação
+## 🧠 Regras de Negócio Implementadas
 
-* **Arquitetura:** Separação de responsabilidades e clareza.
-* **TypeScript:** Uso correto de tipagem.
-* **Mongoose:** Modelagem e queries eficientes.
-* **Commits:** Histórico e organização no Git.
+### 👤 Autenticação
+- Registro de usuário
+- Login com retorno de **JWT**
+- Middleware de autenticação protegendo as rotas de pedidos
+
+### 📦 Gestão de Pedidos
+- Criação de pedidos com:
+  - `state` inicial **CREATED**
+  - `status` inicial **ACTIVE**
+- Listagem de pedidos com:
+  - Paginação
+  - Filtro por `state`
+
+### ✅ Validações
+- Não é permitido criar pedidos:
+  - Sem serviços
+  - Com valor total dos serviços igual ou menor que zero
+
+### 🔄 Fluxo de Estados
+O fluxo de estados do pedido segue **ordem estrita**:
+
+```
+
+CREATED → ANALYSIS → COMPLETED
+
+````
+
+- Não é permitido:
+  - Pular etapas
+  - Retroceder estados
+- Endpoint dedicado para avanço de estado:
+  - `PATCH /orders/:id/advance`
 
 ---
 
-### 📅 Prazo de Entrega
+## 🧪 Testes Unitários
 
-A data limite para submissão do link do repositório é **04/01**. Envios após essa data não serão considerados. Bom código!"
+Os testes foram implementados com **Vitest**, focando nas regras críticas de negócio.
 
-**Entrega:** Link do repositório com instruções de execução no README.
+### O que é testado:
+- Transição válida entre estados
+- Bloqueio de transições inválidas
+
+Exemplo:
+- ✅ CREATED → ANALYSIS
+- ❌ COMPLETED → (qualquer outro estado)
+
+---
+
+## 🚀 Como Executar o Projeto
+
+### 1️⃣ Clonar o repositório
+```bash
+git clone <link-do-repositorio>
+cd order-management-challenge
+````
+
+### 2️⃣ Instalar dependências
+
+```bash
+npm install
+```
+
+### 3️⃣ Configurar variáveis de ambiente
+
+Crie um arquivo `.env` na raiz do projeto:
+
+```env
+PORT=3000
+MONGO_URI=mongodb://localhost:27017/order-management
+JWT_SECRET=supersecretkey
+```
+
+### 4️⃣ Executar em ambiente de desenvolvimento
+
+```bash
+npm run dev
+```
+
+Servidor disponível em:
+
+```
+http://localhost:3000
+```
+
+---
+
+## 🧪 Executar Testes
+
+```bash
+npm run test
+```
+
+---
+
+## 📡 Principais Endpoints
+
+### 🔐 Autenticação
+
+| Método | Rota           | Descrição              |
+| ------ | -------------- | ---------------------- |
+| POST   | /auth/register | Registro de usuário    |
+| POST   | /auth/login    | Login e retorno do JWT |
+
+### 📦 Pedidos (Protegidos)
+
+| Método | Rota                | Descrição                       |
+| ------ | ------------------- | ------------------------------- |
+| POST   | /orders             | Criação de pedido               |
+| GET    | /orders             | Listagem com paginação e filtro |
+| PATCH  | /orders/:id/advance | Avança o estado do pedido       |
+
+---
+
+## 🎯 Decisões Técnicas
+
+* **Service Layer** para regras de negócio, facilitando testes e manutenção
+* **Middlewares** para autenticação e segurança
+* **Enums e tipagem forte** para garantir consistência dos dados
+* **Testes unitários desacoplados do Express/Mongoose**, focando lógica pura
+
+---
+
+## 🧩 Melhorias Futuras
+
+* Soft delete real utilizando `status`
+* Testes de integração
+* Paginação retornando metadata
+* Documentação via Swagger
+
+---
+
+## 👨‍💻 Autor
+
+**Karla Ferreira**
+Estudante de Ciência da Computação e Engenharia de Software.
+
+---
